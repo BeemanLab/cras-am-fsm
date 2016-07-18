@@ -1,3 +1,17 @@
+cra_practice = [
+    {
+        "firstWord":"practice1", 
+        "secondWord":"practice2", 
+        "thirdWord" : "practice3"
+    },
+    {
+        "firstWord":"practice1",
+        "secondWord":"practice2", 
+        "thirdWord" : "practice3"
+    },
+]
+
+
 cra_examples = [
     {
     	"firstWord":"pine", 

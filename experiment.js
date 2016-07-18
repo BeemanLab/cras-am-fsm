@@ -1,5 +1,6 @@
 var canvas = document.getElementById("canvas");
 var ctx = canvas.getContext("2d");
+var textSlide = document.getElementById('text');
 var trialNum = 0;
 var NAcount_prob = 0;
 var NAcount_sol = 0;
@@ -9,6 +10,11 @@ var solutionInput;
 var IorAInput;
 var solutionPrompt;
 var masterClockStart;
+var dateTimeStart;
+var dateTimeEnd;
+var blockNum = 0; 
+var practice = true;
+var practiceNum = 0;
 
 var WIDTH = 600;
 var HEIGHT = 400;
@@ -24,32 +30,34 @@ var response_log = [];
 response_log.push('Lead Investigator: Test');
 response_log.push('IRB protocol #STU...');
 
+//   AMW we can't use these till linked to server.js
+//response_log.push('SessionId is: ' + params["session"]);
+//response_log.push('GroupId is: ' + params["group"]);
+//response_log.push('WorkerID is: ' + params["workerId"]);
+//response_log.push('AssignmentID is: ' + params["assignmentId"]);
 
-
-//data.push('SessionId is: ' + params["session"]);
-//data.push('GroupId is: ' + params["group"]);
-//data.push('WorkerID is: ' + params["workerId"]);
-//data.push('AssignmentID is: ' + params["assignmentId"]);
+//  AMW we need to link these to specs/experiment info 
 //response_log.push('Fixation Timeout: ' + fixateTimeout);
 //response_log.push('Stimulus Timeout: ' + desired_OST * 1000);
 //response_log.push('Response Timeout: ' + desired_OST * 1000);
 //response_log.push('Feedback Timeout: ' + feedbackTimeout);
 //response_log.push('ITI: ' + itiTimeout);
-
 //response_log.push('\n\nTrials Before Break: ' + trialBeforeBreak);
 //response_log.push('Trials Before Test: ' + trialsBeforeTest);
 //response_log.push('Trials Before End: ' + trialsBeforeEnd);
 //response_log.push('Total Trials: ' + cfg["exp_control"].stimList.length);
 
-//response_log.push(dateTimeStart+'\n\n');
+dateTimeStart = Date();
+response_log.push('Start date time: ' + dateTimeStart + '\n\n');
 
 // headers for data output (space separated)
-// ASW
-//response_log.push("trial total_time sf ori stimImg label response feedback hit/miss RT block subj_session_token");
+response_log.push("subj_session_token blockNum trialNum readyRT word1 word2 word3 craRT solutionRT craSolution IorART IorA");
+// Ben's: response_log.push("trial total_time sf ori stimImg label response feedback hit/miss RT block subj_session_token");
 
+console.log(response_log);
 
-function initiateExperiment()
-{
+function initiateExperiment(){
+
 	var fsm = StateMachine.create({
 
 		events : [
@@ -71,15 +79,43 @@ function initiateExperiment()
 			oninstructions: function (event, from, to) 
 			{
 				masterClockStart = performance.now();
-				ctx.clearRect(0,0, WIDTH, HEIGHT);
-				ctx.fillText("Insert instructions here", WIDTH/2, HEIGHT/2);
+				text.innerText=instrux.slide1;
 
 				window.onkeydown = function(e) {
 					if (e.keyCode === 32) {
 						e.preventDefault();
-						fsm.onready();
-					}
-				}
+						text.innerText=instrux.slide2;
+
+						window.onkeydown = function(e) {
+							if (e.keyCode === 32) {
+								e.preventDefault();
+								text.innerText=instrux.slide3;
+
+								window.onkeydown = function(e) {
+									if (e.keyCode === 32) {
+										e.preventDefault();
+										text.innerText=instrux.slide4;
+
+										window.onkeydown = function(e) {
+											if (e.keyCode === 32) {
+												e.preventDefault();
+												text.innerText=instrux.slide5;
+
+												window.onkeydown = function(e) {
+													if (e.keyCode === 32) {
+														e.preventDefault();
+														document.body.removeChild(text);
+														fsm.onready();
+													}
+												}
+											}
+										}
+									}
+								}
+							}	
+						}
+					}				
+				}					
 			},
 
 			onready: function (event, from, to)
@@ -88,8 +124,16 @@ function initiateExperiment()
 				ctx.clearRect(0,0, WIDTH, HEIGHT);
 				ctx.fillText("Ready?",WIDTH/2, HEIGHT/2);
 
-				trialNum++;
-				console.log('trialNum', trialNum);
+				response_log.push(blockNum);
+
+				if (!practice){
+					trialNum++;
+					response_log.push(trialNum);
+				}
+				else if (practice){
+					practiceNum++;
+					response_log.push(practiceNum);
+				}
 
 				window.onkeydown = function (e) {
   					if(e.keyCode === 32){
@@ -97,7 +141,7 @@ function initiateExperiment()
     					endReadyTime = performance.now();
     					totalReadyTime = endReadyTime - startReadyTime;
     					totalReadyTime = totalReadyTime.toFixed(2);
-    					response_log.push("Total Ready Time for Trial " + trialNum + " : " + totalReadyTime);
+    					response_log.push(totalReadyTime);
     					console.log(response_log);
     					fsm.oniti();
   					}
@@ -113,18 +157,38 @@ function initiateExperiment()
 			onproblem: function (event, from, to)
 			{
 				var timeout = setTimeout(function(){
-					console.log("Problem Timeout for Trial " + trialNum);
-					response_log.push("Problem Timeout for Trial " + trialNum);
+					console.log("Problem Timeout");
+					response_log.push(" ");
+					response_log.push(" ");
+					response_log.push(" ");
+					response_log.push(" ");
+					response_log.push(" ");
 					NAcount_prob++;
 					fsm.onmoveToNext();}, 
 					specs.CRA_timeout);
 				var problemTimer = performance.now();
 
-
+				if (!practice) {
 				ctx.fillText(cra_examples[trialNum-1].firstWord +  " " 
 							+ cra_examples[trialNum-1].secondWord + " "
 							+ cra_examples[trialNum-1].thirdWord
 							, WIDTH/2, HEIGHT/2);
+
+				response_log.push(cra_examples[trialNum-1].firstWord +  " " 
+							+ cra_examples[trialNum-1].secondWord + " "
+							+ cra_examples[trialNum-1].thirdWord);
+				}
+				else {
+					ctx.fillText(cra_practice[practiceNum-1].firstWord +  " " 
+							+ cra_practice[practiceNum-1].secondWord + " "
+							+ cra_practice[practiceNum-1].thirdWord
+							, WIDTH/2, HEIGHT/2);
+
+					response_log.push(cra_practice[practiceNum-1].firstWord +  " " 
+							+ cra_practice[practiceNum-1].secondWord + " "
+							+ cra_practice[practiceNum-1].thirdWord);
+				}
+				
 
 				window.onkeydown = function(e) {
 					if (e.keyCode === 32) {
@@ -133,8 +197,7 @@ function initiateExperiment()
 						var problemEndTime = performance.now();
      					var totalProblemTime = problemEndTime - problemTimer;
      					totalProblemTime = totalProblemTime.toFixed(2);
-     					response_log.push("Total Problem Time for Trial " + trialNum + " : " + totalProblemTime);
-     					console.log(response_log);
+     					response_log.push(totalProblemTime);
 						fsm.onsolution();
 					}
 				}
@@ -142,12 +205,11 @@ function initiateExperiment()
 
 			onsolution: function (event, from, to)
 			{
-				//console.log("onsolution");
 				ctx.clearRect(0,0, WIDTH, HEIGHT);
 				ctx.fillText("Solution?", WIDTH/2, HEIGHT/2);
 				var timeout = setTimeout(function(){
-					console.log("Solution Timeout for Trial " + trialNum);
-					response_log.push("Solution Timeout for Trial " + trialNum);
+					console.log("Solution Timeout");
+					response_log.push("solTimeout");
 					NAcount_sol++;
 					fsm.onmoveToNext();
 				}, specs.sol_timeout);
@@ -169,17 +231,17 @@ function initiateExperiment()
 			     		totalSolutionTime = totalSolutionTime.toFixed(2);
 			     		solutionInput = document.getElementById("textbox").value;
 
-			     		response_log.push("Total Solution Time for Trial " + trialNum + " : " + totalSolutionTime);
+			     		response_log.push(totalSolutionTime);
 
 			     		if (solutionInput == ""){
 			     			NAcount_sol++;
 			     			console.log("NAcount_sol", NAcount_sol);
-							response_log.push("SolutionInput blank for Trial " + trialNum);
+							response_log.push("blankInput");
 							fsm.onmoveToNext();
 			     		} 
 			     		else {
 			     			document.body.removeChild(solutionPrompt);
-			     			response_log.push("solutionInput " + trialNum + ": " + solutionInput);
+			     			response_log.push(solutionInput);
 							fsm.onIorA();
 			     		}
 					}
@@ -192,8 +254,8 @@ function initiateExperiment()
 				ctx.clearRect(0,0, WIDTH, HEIGHT);
 				ctx.fillText("Insight or Analysis?", WIDTH/2, HEIGHT/2);
 				var timeout = setTimeout(function(){
-					console.log("IorA Timeout for Trial " + trialNum);
-					response_log.push("IorA Timeout for Trial " + trialNum);
+					console.log("IorA Timeout");
+					response_log.push(" ");
 					NAcount_IorA++;
 					fsm.onmoveToNext();}, 
 					specs.iora_timeout);
@@ -209,14 +271,12 @@ function initiateExperiment()
 			     		iaTimerTotal = iaTimerTotal.toFixed(2);
 			     		IorAInput = String.fromCharCode(e.keyCode);
 
-			     		response_log.push("Total IorA Time for Trial " + trialNum + " : " + iaTimerTotal);
-			     		response_log.push("IorAInput: " + IorAInput);
+			     		response_log.push(iaTimerTotal);
+			     		response_log.push(IorAInput);
 			     		console.log(response_log);
      					fsm.onmoveToNext();
      				}
      			}
-
-     			response_log.push("IorA Timeout for Trial " + trialNum);
 			},
 
 			onmoveToNext: function (event, from, to)
@@ -225,15 +285,21 @@ function initiateExperiment()
 
 				if (!!solBoxExist){
 					document.body.removeChild(solutionPrompt);
-			     	response_log.push("Solution Page Timeout for Trial " + trialNum);
 				}
 
+				if (practiceNum == cra_practice.length){
+					practice = false;
+					practiceNum = 0;
+					// NOT WORKING :( ctx.fillText(instrux.slide6, WIDTH/2, HEIGHT/2);
+					blockNum++;
+				}
 				//error handling - too many solution NAs
 				if (NAcount_sol == specs.NAcount_sol_max 
 					|| NAcount_prob == specs.NAcount_prob_max) {
 					fsm.onend();
 				}
 				else if (trialNum == (Math.floor(cra_examples.length/2))){
+					blockNum++;
 					fsm.onbreak();
 				} 
 				else if (trialNum < cra_examples.length){
@@ -267,7 +333,8 @@ function initiateExperiment()
 				var masterClockSec = (masterClockMs/1000) % 60;
 				masterClockSec = masterClockSec.toFixed(0);
 				console.log("masterClock", masterClockMin + ": " + masterClockSec);
-				//response_log.push("masterClock: " + masterClock);
+				dateTimeEnd = Date();
+				response_log.push('End date time: ' + dateTimeEnd);
 				ctx.clearRect(0,0, WIDTH, HEIGHT);
 				ctx.fillText("Experiment Complete",
 					WIDTH/2, HEIGHT/2);
