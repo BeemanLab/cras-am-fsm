@@ -15,6 +15,7 @@ var dateTimeEnd;
 var blockNum = 0; 
 var practice = true;
 var practiceNum = 0;
+//var practiceTransition;
 
 var WIDTH = 600;
 var HEIGHT = 400;
@@ -129,6 +130,11 @@ function initiateExperiment(){
 				if (!practice){
 					trialNum++;
 					response_log.push(trialNum);
+
+					// var practiceTransition = document.getElementById("text2");
+					// if (!! practiceTransition){
+					// 	document.body.removeChild(practiceTransition);		
+					// }
 				}
 				else if (practice){
 					practiceNum++;
@@ -254,7 +260,7 @@ function initiateExperiment(){
 				ctx.clearRect(0,0, WIDTH, HEIGHT);
 				ctx.fillText("Insight or Analysis?", WIDTH/2, HEIGHT/2);
 				var timeout = setTimeout(function(){
-					console.log("IorA Timeout");
+			 		console.log("IorA Timeout");
 					response_log.push(" ");
 					NAcount_IorA++;
 					fsm.onmoveToNext();}, 
@@ -290,9 +296,17 @@ function initiateExperiment(){
 				if (practiceNum == cra_practice.length){
 					practice = false;
 					practiceNum = 0;
-					// NOT WORKING :( ctx.fillText(instrux.slide6, WIDTH/2, HEIGHT/2);
 					blockNum++;
+
+					ctx.clearRect(0,0,WIDTH,HEIGHT);
+			    	var practiceTransition = document.getElementById("text2");
+					practiceTransition.innerText=instrux.slide6;
+
+					var ptExists = true;
+						
+
 				}
+
 				//error handling - too many solution NAs
 				if (NAcount_sol == specs.NAcount_sol_max 
 					|| NAcount_prob == specs.NAcount_prob_max) {
@@ -303,8 +317,25 @@ function initiateExperiment(){
 					fsm.onbreak();
 				} 
 				else if (trialNum < cra_examples.length){
-					fsm.onready();
+					//var PT = document.getElementById("text2");
+					if (ptExists){
+						document.onkeydown = function(e) {
+							if (e.keyCode === 13) {
+								e.preventDefault();
+								console.log('in practiceTransition', practiceTransition);
+								//practiceTransition.innerText='';
+								document.body.removeChild(practiceTransition);
+								ptExists = false;	
+								fsm.onready();
+							}
+						}
+					}
+					else {
+						fsm.onready();
+					}
+					//fsm.onready();
 				}
+				
 				else {
 					fsm.onend();
 				}

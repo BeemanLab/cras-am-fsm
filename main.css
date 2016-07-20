@@ -6,7 +6,8 @@
     top: 230px;
 }
 
-#text {
+#text,
+#text2 {
 	font-family: 'Arial', sans-serif;
 	font-size: 20px; 
 	text-align: center; 

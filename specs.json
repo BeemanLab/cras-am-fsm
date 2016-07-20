@@ -3,8 +3,8 @@ var specs =
 		"CRA_timeout" : 3000,
 		"sol_timeout" : 6000,
 		"iora_timeout" : 3000,
-		"NAcount_sol_max": 2,
-		"NAcount_prob_max": 4	
+		"NAcount_sol_max": 3,
+		"NAcount_prob_max": 4
 	}
 
 var instrux =
@@ -14,5 +14,5 @@ var instrux =
 		"slide3" : "You will also decide whether the solution was reached with insight or with analysis \nInsight:\n- sudden & surprising\n- confidence; you 'just know' solution works with all 3 problem words\n- may be unable to articulate how you reached the solution\n-  Aha! moment \nAnalysis:\n- gradually approach solution\n- part by part solution \n- may use deliberate strategy\n- might be able to report steps \n\nPress space bar to continue",
 		"slide4" : "No solution type is better or worse than the other; there are no right or wrong answers in reporting insight or analysis. \nYou will not be able to solve every problem, and that is OK. \n\nPress space bar to continue",
 		"slide5" : "Press spacebar when you are ready to start the practice problems.",
-		"slide6" : "Now the experiment will begin.\nPress spacebar to begin"
+		"slide6" : "Now the experiment will begin.\nPress enter to begin"
 	}
